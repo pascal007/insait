@@ -50,13 +50,13 @@ class GeneratedTextManager:
         return generated_text
 
     @staticmethod
-    def update_generated_text(user_id, prompt_id, new_prompt):
+    def update_generated_text(user_id, prompt_id, response):
         user_id = UUID(user_id)
         generated_text = GeneratedText.query.filter_by(user_id=user_id, id=prompt_id).first()
         if not generated_text:
             raise ValidationError("Generated Text not found")
 
-        generated_text.prompt = new_prompt
+        generated_text.response = response
         db.session.commit()
         return generated_text
 

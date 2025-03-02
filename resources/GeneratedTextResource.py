@@ -33,11 +33,11 @@ class GeneratedTextResourceById(Resource):
         user_id = get_jwt_identity()
         data = request.get_json()
 
-        if not data or "prompt" not in data or not data["prompt"]:
-            return {"success": False, "error": "Prompt is required."}, 400
+        if not data or "response" not in data or not data["response"]:
+            return {"success": False, "error": "Content is required."}, 400
 
         try:
-            updated_text = GeneratedTextManager.update_generated_text(user_id, prompt_id, data["prompt"])
+            updated_text = GeneratedTextManager.update_generated_text(user_id, prompt_id, data["response"])
             return {"success": True, "data": updated_text.to_dict()}, 200
         except ValidationError as err:
             return {"success": False, "error": str(err)}, 404

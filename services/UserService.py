@@ -1,33 +1,36 @@
-from flask_jwt_extended import create_access_token
-from marshmallow import ValidationError
-from werkzeug.security import generate_password_hash, check_password_hash
+import jwt
+import os
+from datetime import datetime, timedelta
 
-from models.User import User
-from resources.extensions import db
+from repository.UserRepository import UserRepository
+from logger_config import logger
 
 
 class UserService:
+    def __init__(self):
+        self.user_repo = UserRepository()
+        self.secret_key = os.getenv("JWT_SECRET_KEY")
 
-    def create_user(self, username, password):
-        self.username_check(username)
-        hashed_password = generate_password_hash(password)
-        new_user = User(username=username, password_hash=hashed_password)
-        db.session.add(new_user)
-        db.session.commit()
+    def create_user(self, username: str, password: str):
+        try:
+            logger.info(f"Creating user: {username}")
+            return self.user_repo.create_user(username.lower().strip(), password)
+        except Exception as e:
+            logger.error(f"Error creating user {username}: {str(e)}")
+            raise
 
-    @staticmethod
-    def username_check(username, exists=False):
-        existing_user = User.query.filter_by(username=username).first()
-        if exists:
-            if not existing_user:
-                raise ValidationError("Invalid username submitted")
-            return existing_user
-        if existing_user:
-            raise ValidationError("Username is already used by another user")
+    def generate_token(self, username: str, password: str):
+        logger.debug(f"Attempting login for user: {username}")
+        user = self.user_repo.verify_password(username, password)
+        if not user:
+            logger.warning(f"Invalid login attempt for username: {username}")
+            raise FileNotFoundError("User does not exist")
 
-    def generate_token(self, username, password):
-        user = self.username_check(username, True)
-        if not check_password_hash(user.password_hash, password):
-            raise ValidationError("Invalid password submitted")
-        return create_access_token(identity=user.id)
-
+        payload = {
+            "sub": str(user.id),
+            "username": user.username,
+            "exp": datetime.utcnow() + timedelta(hours=24)
+        }
+        token = jwt.encode(payload, self.secret_key, algorithm="HS256")
+        logger.info(f"Token generated successfully for user: {username}")
+        return token

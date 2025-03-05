@@ -14,13 +14,13 @@ def create_app(config_name=None):
     flask_app = Flask(__name__)
     api = Api(flask_app)
     initialize_routes(api)
-    if config_name == "testing":
-        flask_app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///:memory:"
-        flask_app.config["TESTING"] = True
-        flask_app.config["JWT_SECRET_KEY"] = "09id042r8u9ew4rhp9woj9w"
-    else:
-        flask_app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
-        flask_app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
+    # if config_name == "testing":
+    flask_app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///:memory:"
+    flask_app.config["TESTING"] = True
+    flask_app.config["JWT_SECRET_KEY"] = os.getenv('JWT_SECRET_KEY')
+    # else:
+    #     flask_app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
+    #     flask_app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
 
     db.init_app(flask_app)
     jwt.init_app(flask_app)

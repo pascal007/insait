@@ -29,12 +29,13 @@ def test_update_generated_text(client, auth_headers):
     prompt_id = create_response.json["data"]["id"]
     update_response = client.put(
         f"/generated-text/{prompt_id}",
-        json={"prompt": "Updated prompt"},
+        json={"response": "Updated content"},
         headers=auth_headers
     )
     assert update_response.status_code == 200
     assert update_response.json["success"] is True
-    assert update_response.json["data"]["prompt"] == "Updated prompt"
+    assert update_response.json["data"]["response"] == "Updated content"
     get_response = client.get(f"/generated-text/{prompt_id}", headers=auth_headers)
+    print(get_response.json)
     assert get_response.status_code == 200
-    assert get_response.json["data"]["prompt"] == "Updated prompt"
+    assert get_response.json["data"]["response"] == "Updated content"
